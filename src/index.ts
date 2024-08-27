@@ -38,7 +38,6 @@ const errorHandlerSymbol: unique symbol = Symbol('errorHandler')
 export {
   parseAsyncSymbol as parseAsync,
   parseSafeSymbol as parseSafe,
-  shapeSymbol as shape,
   errorHandlerSymbol as errorHandler
 }
 
@@ -117,6 +116,15 @@ export const schema = <T extends ZodSchema>(
   }
 
   return {
+    /**
+     * This object returns a proxy function takes a ZodSchema and returns a proxy that can be used to
+     * trap the values being set on the valtio proxy.
+     *
+     * @param zodSchema The ZodSchema to use to parse the values of the valtio store
+     * @param stateObject A valtio store object
+     * @returns a Proxy that can be used to trap the values being set on the proxy
+     * and validate them against the ZodSchema before passing them on to the valtio store.
+     */
     proxy: (stateObject: any): ValtioProxy<T> => {
       // define valtio proxy that we can use to pass values to the store
       const valtioProxy = proxy(stateObject) as ValtioProxy<T>
@@ -161,11 +169,11 @@ export const schema = <T extends ZodSchema>(
       }
 
       return new Proxy<ValtioProxy<T>>(valtioProxy, {
-        // Use zode to check if the value is valid and if so, set the value on the valtio proxy
+        // Use zod to check if the value is valid and if so, set the value on the valtio proxy
         set(target: z.infer<T>, prop: keyof z.infer<T>, value: any) {
           const property = zodSchema.pick({ [prop]: true as const })
 
-          //
+          // only use try catch if the schema is not async
           if (parseAsync) {
             property
               .parseAsync({ [prop]: value })
