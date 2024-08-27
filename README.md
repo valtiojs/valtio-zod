@@ -20,6 +20,8 @@ are welcome and strongly encouraged.
 
 ## How to use it
 
+**Note:** This is a work in progress. The API is likely to change. This has not been published to npm yet.
+
 ```js
 import { schema } from 'valtio-zod'
 

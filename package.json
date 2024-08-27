@@ -39,10 +39,7 @@
     "test:lint": "eslint .",
     "test:types": "tsc -p . --noEmit",
     "test:types:examples": "tsc -p examples --noEmit",
-    "test:spec": "vitest run",
-    "examples:01_obj": "DIR=01_obj vite",
-    "examples:02_array": "DIR=02_array vite",
-    "examples:03_minecraft": "DIR=03_minecraft vite"
+    "test:spec": "vitest run"
   },
   "keywords": [
     "valtio",
