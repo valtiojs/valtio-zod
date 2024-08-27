@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "./build",
     "strict": true,
     "target": "es2018",
     "esModuleInterop": true,
@@ -15,5 +16,5 @@
       "valtio-yjs": ["./src/index.js"]
     }
   },
-  "exclude": ["dist", "examples"]
+  "exclude": ["./dist/**/*", "./examples/**/*"]
 }
