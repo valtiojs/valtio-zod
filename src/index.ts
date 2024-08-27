@@ -161,8 +161,11 @@ export const schema = <T extends ZodSchema>(
       }
 
       return new Proxy<ValtioProxy<T>>(valtioProxy, {
+        // Use zode to check if the value is valid and if so, set the value on the valtio proxy
         set(target: z.infer<T>, prop: keyof z.infer<T>, value: any) {
           const property = zodSchema.pick({ [prop]: true as const })
+
+          //
           if (parseAsync) {
             property
               .parseAsync({ [prop]: value })
@@ -188,6 +191,7 @@ export const schema = <T extends ZodSchema>(
           return true
         },
 
+        // Use valtio proxy to get the value
         get(target: ValtioProxy<T>, prop: string | symbol) {
           return valtioProxy[prop as keyof T]
         }
