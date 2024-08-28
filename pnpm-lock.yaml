@@ -98,9 +98,6 @@ devDependencies:
   yup:
     specifier: ^1.4.0
     version: 1.4.0
-  zod:
-    specifier: ^3.23.8
-    version: 3.23.8
 
 packages:
 
@@ -3989,10 +3986,6 @@ packages:
       tiny-case: 1.0.3
       toposort: 2.0.2
       type-fest: 2.19.0
-    dev: true
-
-  /zod@3.23.8:
-    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
     dev: true
 
   /zustand@3.7.2(react@18.3.1):
