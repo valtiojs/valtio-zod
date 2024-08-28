@@ -63,27 +63,38 @@ const userSchema = z.object({
 const userState = schema(userSchema).proxy({
   name: 'John Doe',
   age: 30
-})
+}
 ```
 
-#### Config Symbols
+### Configuration
 
-##### parseAsync
+These properties can be passed to the `proxy` function to configure how each schema is handled.
+`parseSafe` and `errorHandler` are also available as properties on the `vzGlobalConfig` object
+to configure the default behavior of all schemas that don't provide their own configuration.
 
-This symbol is used to configure how the schema is parsed. You can attaach
-it to the schema object as a property. It will be omitted from the final schema object.
+> | property       | type                   | description                                                        |
+> | -------------- | ---------------------- | ------------------------------------------------------------------ |
+> | `parseAsync`   | `boolean`              | Tells zod whether or not to parse the value asynchronously         |
+> | `parseSafe`    | `boolean`              | Tells zod whether or not to throw an error when a value is invalid |
+> | `errorHandler` | `(error: any) => void` | A function that is called when a value is invalid                  |
+
+#### `parseAsync` example
 
 ```js
-import { schema, parseAsync } from 'valtio-zod'
+import { schema } from 'valtio-zod'
 
 const promiseSchema = z.object({
-  name: z.promise(z.string()),
-  [parseAsync]: true
+  name: z.promise(z.string())
 })
 
-const userState = schema(promiseSchema).proxy({
-  name: Promise.resolve('Jane Doe')
-})
+const userState = schema(promiseSchema).proxy(
+  {
+    name: Promise.resolve('Jane Doe')
+  },
+  {
+    parseAsync: true
+  }
+)
 
 userState.name = 'Jane Doe'
 // userState.name = 'Jane Doe'
@@ -92,23 +103,24 @@ userState.name = 55 // Error
 // userState.name = 'Jane Doe'
 ```
 
-##### parseSafe
-
-This symbol is used to configure how the schema is parsed.
-You can attaach it to the schema object as a property. It will be omitted from the final schema object.
+#### `parseSafe` example\
 
 ```js
-import { schema, parseSafe } from 'valtio-zod'
+import { schema } from 'valtio-zod'
 
 const userSchema = z.object({
-  name: z.string(),
-  [parseSafe]: true
+  name: z.string()
 })
 
-const userState = schema(userSchema).proxy({
-  name: 'John Doe',
-  age: 30
-})
+const userState = schema(userSchema).proxy(
+  {
+    name: 'John Doe',
+    age: 30
+  },
+  {
+    parseSafe: true
+  }
+)
 
 userState.name = 'Jane Doe'
 // userState.name = 'Jane Doe'
@@ -118,37 +130,35 @@ userState.name = 55 // Error
 // userState.name = 'Jane Doe'
 ```
 
-##### errorHandler
+`parseSafe` is also available as a property on the `vzGlobalConfig` object
 
-This symbol is used to configure how errors are handled.
-You can attaach it to the schema object as a property. It will be omitted from the final schema object.
-This function is called with the error object when the schema is invalid.
-This way you can use your own error handling logic alongside Zod.Error
+```js
+import { vzGlobalConfig } from 'valtio-zod'
+
+vzGlobalConfig.parseSafe = true
+```
+
+#### `errorHandler` example
+
+This will allow you to use your own error handling logic (or use `Zod.Error`)
 
 ```js
 import { schema, errorHandler } from 'valtio-zod'
 
 const userSchema = z.object({
   name: z.string(),
-  age: z.number(),
-  [errorHandler]: (error) => {
-    console.error(error)
-  }
+  age: z.number()
 })
-```
 
-##### globalConfig
-
-This is the global config that can be used to configure how a schema if
-no value is provided for the schema. It a convenience for setting the
-default values for all that can be overridden by each schema. The only
-symbols currently supported are `parseSafe` and `errorHandler`.
-
-```js
-import { globalConfig, parseSafe, errorHandler } from 'valtio-zod'
-
-globalConfig[parseSafe] = true
-globalConfig[errorHandler] = (error) => {
-  console.error(error)
-}
+const userState = schema(userSchema).proxy(
+  {
+    name: 'John Doe',
+    age: 30
+  },
+  {
+    errorHandler: (error) => {
+      console.error(error)
+    }
+  }
+)
 ```

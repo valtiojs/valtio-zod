@@ -13,8 +13,9 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "valtio-yjs": ["./src/index.js"]
+      "valtio-zod": ["./src/index.js"]
     }
   },
-  "exclude": ["./dist/**/*", "./examples/**/*"]
+  "include": ["./src/**/*", "./tests/**/*", "./examples/**/*"],
+  "exclude": ["./dist/**/*"]
 }
