@@ -129,51 +129,51 @@ describe('valtio-zod schema', () => {
     expect(user.profile).toEqual(updatedProfile)
   })
 
-  // it('should error by updating a value in a nested object', () => {
-  //   const userSchema = z.object({
-  //     username: z.string(),
-  //     age: z.number().int(),
-  //     profile: z.object({
-  //       firstName: z.string(),
-  //       lastName: z.string(),
-  //       address: z.object({
-  //         city: z.string(),
-  //         country: z.string()
-  //       })
-  //     })
-  //   })
+  it('should error by updating a value in a nested object', () => {
+    const userSchema = z.object({
+      username: z.string(),
+      age: z.number().int(),
+      profile: z.object({
+        firstName: z.string(),
+        lastName: z.string(),
+        address: z.object({
+          city: z.string(),
+          country: z.string()
+        })
+      })
+    })
 
-  //   const errorHandler = vi.fn()
+    const errorHandler = vi.fn()
 
-  //   const { proxy } = schema(userSchema)
-  //   const user = proxy(
-  //     {
-  //       username: 'Alice',
-  //       age: 30,
-  //       profile: {
-  //         firstName: 'Alice',
-  //         lastName: 'Smith',
-  //         address: {
-  //           city: 'Wonderland',
-  //           country: 'Fantasy'
-  //         }
-  //       }
-  //     },
-  //     { errorHandler }
-  //   )
+    const { proxy } = schema(userSchema)
+    const user = proxy(
+      {
+        username: 'Alice',
+        age: 30,
+        profile: {
+          firstName: 'Alice',
+          lastName: 'Smith',
+          address: {
+            city: 'Wonderland',
+            country: 'Fantasy'
+          }
+        }
+      },
+      { errorHandler }
+    )
 
-  //   console.log('Before invalid assignment')
-  //   try {
-  //     // Invalid city type
-  //     // @ts-expect-error for test use case
-  //     user.profile.address.city = 123
-  //   } catch (e) {
-  //     console.error('Caught error:', e)
-  //   }
-  //   console.log('After invalid assignment')
+    console.log('Before invalid assignment')
+    try {
+      // Invalid city type
+      // @ts-expect-error for test use case
+      user.profile.address.city = 123
+    } catch (e) {
+      console.error('Caught error:', e)
+    }
+    console.log('After invalid assignment')
 
-  //   expect(errorHandler).toHaveBeenCalled()
-  //   // Ensure the value hasn't changed from the initial valid value
-  //   expect(user.profile.address.city).toBe('Wonderland')
-  // })
+    expect(errorHandler).toHaveBeenCalled()
+    // Ensure the value hasn't changed from the initial valid value
+    expect(user.profile.address.city).toBe('Wonderland')
+  })
 })
