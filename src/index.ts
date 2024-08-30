@@ -83,7 +83,7 @@ export const schema = <T extends ZodType<any>>(
     }
 
     const valtioProxy = vproxy(initialState)
-    const createProxy = (target: any): any => {
+    const createProxy = (target: any, parentPath: PropType[] = []): any => {
       if (!schemaMeta.has(zodSchema)) {
         schemaMeta.set(zodSchema, {
           safeParse,
@@ -91,40 +91,36 @@ export const schema = <T extends ZodType<any>>(
           errorHandler,
           initialState
         })
-
-        Reflect.ownKeys(target).forEach((key) => {
-          if (isObject(target[key])) {
-            const currentPath = pathList.get(target) || []
-            const newPath = [...currentPath, key.toString()]
-            pathList.set(target[key], newPath)
-            createProxy(target[key])
-          }
-        })
       }
+
+      Reflect.ownKeys(target).forEach((key) => {
+        if (isObject(target[key])) {
+          const newPath = parentPath.concat(key)
+          pathList.set(target[key], newPath)
+          createProxy(target[key], newPath)
+        }
+      })
 
       return new Proxy(target, {
         get(target, prop, receiver) {
           const value = Reflect.get(target, prop, receiver)
-          return isObject(value) ? createProxy(value) : value
+          return isObject(value)
+            ? createProxy(value, parentPath.concat(prop))
+            : value
         },
         set(target, prop, value, receiver) {
-          console.log('target', target)
-          console.log('prop', prop)
-          console.log('value', value)
-          console.log('receiver', receiver)
           const originalObject = schemaMeta.get(zodSchema)!
             .initialState as z.infer<T>
 
-          // Create a copy of the initial state and update the specific path
           const objectToValidate = JSON.parse(JSON.stringify(originalObject))
-          const path = (pathList.get(receiver) || []).concat(prop)
+          const path = (pathList.get(target) || []).concat(prop)
 
           updateObjectAtPath(objectToValidate, value, path)
 
           const handleAsyncParse = async () => {
             try {
               const parsedValue = await zodSchema.parseAsync(objectToValidate)
-              Reflect.set(target, prop, value, receiver) // Set the raw value
+              Reflect.set(target, prop, value, receiver)
               return true
             } catch (error) {
               errorHandler(error)
@@ -140,15 +136,15 @@ export const schema = <T extends ZodType<any>>(
               if (safeParse) {
                 const result = zodSchema.safeParse(objectToValidate)
                 if (result.success) {
-                  Reflect.set(target, prop, value, receiver) // Set the raw value
+                  Reflect.set(target, prop, value, receiver)
                   return true
                 } else {
                   errorHandler(result.error)
-                  return false // Prevent setting the invalid value
+                  return false
                 }
               } else {
                 const parsedValue = zodSchema.parse(objectToValidate)
-                Reflect.set(target, prop, value, receiver) // Set the raw value
+                Reflect.set(target, prop, value, receiver)
                 return true
               }
             } catch (error) {
@@ -156,7 +152,7 @@ export const schema = <T extends ZodType<any>>(
               if (!safeParse) {
                 throw error
               }
-              return false // Prevent setting the invalid value
+              return false
             }
           }
 

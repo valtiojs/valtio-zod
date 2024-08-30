@@ -149,24 +149,27 @@ describe('valtio-zod schema', () => {
     const errorHandler = vi.fn()
 
     const { proxy } = schema(userSchema)
-    const user = proxy({
-      username: 'Alice',
-      age: 30,
-      profile: {
-        firstName: 'Alice',
-        lastName: 'Smith',
-        address: {
-          city: 'Wonderland',
-          country: 'Fantasy'
+    const user = proxy(
+      {
+        username: 'Alice',
+        age: 30,
+        profile: {
+          firstName: 'Alice',
+          lastName: 'Smith',
+          address: {
+            city: 'Wonderland',
+            country: 'Fantasy'
+          }
         }
-      }
-    })
+      },
+      { safeParse: true, errorHandler }
+    )
 
-    // Invalid city type
-    // @ts-expect-error for test use case
-    user.profile.address.country = 123
+    // Invalid country type
+    const result = Reflect.set(user.profile.address, 'country', 123)
 
-    // expect(errorHandler).toHaveBeenCalled()
+    expect(result).toBe(false)
+    expect(errorHandler).toHaveBeenCalled()
     // Ensure the value hasn't changed from the initial valid value
     expect(user.profile.address.country).toBe('Fantasy')
   })
