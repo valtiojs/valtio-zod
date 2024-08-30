@@ -16,6 +16,6 @@
       "valtio-zod": ["./src/index.js"]
     }
   },
-  "include": ["./src/**/*", "./tests/**/*", "./examples/**/*"],
+  "include": ["./src/**/*", "./tests/**/*", "./examples/**/*", "src/test.ts"],
   "exclude": ["./dist/**/*"]
 }

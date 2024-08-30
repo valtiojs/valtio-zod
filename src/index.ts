@@ -31,18 +31,16 @@ type MergedConfig = Required<SchemaConfig>
 type SchemaMeta = SchemaConfig & {
   initialState: unknown
 }
+
+type PropType = string | number | symbol
 const schemaMeta = new WeakMap<ZodType<any>, SchemaMeta>()
-const pathList = new WeakMap<{}, (string | number)[]>()
+const pathList = new WeakMap<{}, PropType[]>()
 
 type SchemaReturn<T extends ZodType<any>> = {
   proxy: (initialState: any, config?: SchemaConfig) => ValtioProxy<z.infer<T>>
 }
 
-function updateObjectAtPath(
-  object: any,
-  newValue: any,
-  path: (string | number)[]
-) {
+function updateObjectAtPath(object: any, newValue: any, path: PropType[]) {
   let stack = [...path]
 
   while (stack.length > 1) {
@@ -110,12 +108,16 @@ export const schema = <T extends ZodType<any>>(
           return isObject(value) ? createProxy(value) : value
         },
         set(target, prop, value, receiver) {
+          console.log('target', target)
+          console.log('prop', prop)
+          console.log('value', value)
+          console.log('receiver', receiver)
           const originalObject = schemaMeta.get(zodSchema)!
             .initialState as z.infer<T>
 
           // Create a copy of the initial state and update the specific path
           const objectToValidate = JSON.parse(JSON.stringify(originalObject))
-          const path = (pathList.get(target) || []).concat(prop.toString())
+          const path = (pathList.get(receiver) || []).concat(prop)
 
           updateObjectAtPath(objectToValidate, value, path)
 
@@ -127,7 +129,7 @@ export const schema = <T extends ZodType<any>>(
             } catch (error) {
               errorHandler(error)
               if (!safeParse) {
-                throw error // Propagate the error to be captured by the test
+                throw error
               }
               return false
             }
@@ -152,7 +154,7 @@ export const schema = <T extends ZodType<any>>(
             } catch (error) {
               errorHandler(error)
               if (!safeParse) {
-                throw error // Propagate the error to be captured by the test
+                throw error
               }
               return false // Prevent setting the invalid value
             }
@@ -162,7 +164,7 @@ export const schema = <T extends ZodType<any>>(
             handleAsyncParse().catch((error) => {
               errorHandler(error)
               if (!safeParse) {
-                throw error // Propagate the error to be captured by the test
+                throw error
               }
             })
             return true

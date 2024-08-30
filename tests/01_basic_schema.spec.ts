@@ -149,30 +149,25 @@ describe('valtio-zod schema', () => {
     const errorHandler = vi.fn()
 
     const { proxy } = schema(userSchema)
-    const user = proxy(
-      {
-        username: 'Alice',
-        age: 30,
-        profile: {
-          firstName: 'Alice',
-          lastName: 'Smith',
-          address: {
-            city: 'Wonderland',
-            country: 'Fantasy'
-          }
+    const user = proxy({
+      username: 'Alice',
+      age: 30,
+      profile: {
+        firstName: 'Alice',
+        lastName: 'Smith',
+        address: {
+          city: 'Wonderland',
+          country: 'Fantasy'
         }
-      },
-      { errorHandler, safeParse: true }
-    )
+      }
+    })
 
-    console.log('Before invalid assignment')
     // Invalid city type
     // @ts-expect-error for test use case
-    user.profile.address.city = 123
-    console.log('After invalid assignment')
+    user.profile.address.country = 123
 
     // expect(errorHandler).toHaveBeenCalled()
     // Ensure the value hasn't changed from the initial valid value
-    expect(user.profile.address.city).toBe('Wonderland')
+    expect(user.profile.address.country).toBe('Fantasy')
   })
 })
