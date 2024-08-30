@@ -133,15 +133,7 @@ export const schema = <T extends ZodType<any>>(
             }
           }
 
-          if (parseAsync && schemaMeta.get(zodSchema)!.parseAsync) {
-            handleAsyncParse().catch((error) => {
-              errorHandler(error)
-              if (!safeParse) {
-                throw error // Propagate the error to be captured by the test
-              }
-            })
-            return true
-          } else {
+          const handleSyncParse = () => {
             try {
               if (safeParse) {
                 const result = zodSchema.safeParse(objectToValidate)
@@ -150,7 +142,7 @@ export const schema = <T extends ZodType<any>>(
                   return true
                 } else {
                   errorHandler(result.error)
-                  return false
+                  return false // Prevent setting the invalid value
                 }
               } else {
                 const parsedValue = zodSchema.parse(objectToValidate)
@@ -162,8 +154,20 @@ export const schema = <T extends ZodType<any>>(
               if (!safeParse) {
                 throw error // Propagate the error to be captured by the test
               }
-              return false
+              return false // Prevent setting the invalid value
             }
+          }
+
+          if (parseAsync) {
+            handleAsyncParse().catch((error) => {
+              errorHandler(error)
+              if (!safeParse) {
+                throw error // Propagate the error to be captured by the test
+              }
+            })
+            return true
+          } else {
+            return handleSyncParse()
           }
         }
       })

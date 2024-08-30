@@ -88,8 +88,5 @@
   "peerDependencies": {
     "valtio": ">=2.0.0-rc.0",
     "zod": "^3.23.8"
-  },
-  "dependencies": {
-    "proxy-compare": "^3.0.0"
   }
 }

@@ -19,11 +19,17 @@ const userSchema = z.object({
     firstName: z.string(),
     lastName: z.string(),
     address: z.object({
-      city: z.string(),
-      country: z.string()
+      foo: z.object({
+        bar: z.string(),
+        bat: z.string()
+      })
     })
   })
 })
+
+const errorHandler = (e) => {
+  console.log('There was an error')
+}
 
 const initialState = {
   username: 'Alice',
@@ -32,14 +38,50 @@ const initialState = {
     firstName: 'Alice',
     lastName: 'Smith',
     address: {
-      city: 'Wonderland',
-      country: 'Fantasy'
+      foo: {
+        bar: 'baz',
+        bat: 123
+      }
     }
   }
 }
+try {
+  userSchema.parse(initialState)
+} catch (e) {
+  console.log(e)
+}
 
-const userState = schema(userSchema).proxy(initialState)
+const userState = schema(userSchema).proxy(initialState, {
+  errorHandler
+})
 
-userState.profile.address.city = 'New City'
+try {
+  // @ts-expect-error for test use case
+  userState.profile.firstName = 123 // throws error and doesn't update
+} catch (e) {
+  console.log(e)
+}
 
-console.log(userState.profile.address.city)
+console.log(userState.profile.firstName)
+// try {
+//   // @ts-expect-error for test use case
+//   userState.profile.address.country = 123 // doesn't throw error and updates
+// } catch (e) {
+//   console.log(e)
+// }
+try {
+  // @ts-expect-error for test use case
+  userState.profile.address.foo.bar = 123
+} catch (e) {
+  console.log(e)
+}
+console.log(userState.profile.address.foo.bar)
+
+try {
+  // @ts-expect-error for test use case
+  userState.profile.address.foo.bat = 123
+} catch (e) {
+  console.log(e)
+}
+
+console.log(userState.profile.address.foo.bar)
