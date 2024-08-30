@@ -13,9 +13,17 @@ schema validation library with static type inference.
 valtio-zod is an attempt to make validating your store values
 with zod as easy as possible.
 
+## Installation
+
+Zod and valtio are peer dependencies.
+
+```bash
+npm install zod valdtio valtio-zod
+```
+
 ## Project Status
 
-Planning and early development. We are still trying to iron out details on how best to implement this. All ideas and feedback
+This project is in early development. We are still trying to iron out details on how best to implement this. All ideas and feedback
 are welcome and strongly encouraged.
 
 ## How to use it
