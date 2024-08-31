@@ -69,7 +69,7 @@ const userSchema = z.object({
 const userState = schema(userSchema).proxy({
   name: 'John Doe',
   age: 30
-}
+})
 ```
 
 ### Configuration
