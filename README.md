@@ -29,22 +29,22 @@ are welcome and strongly encouraged.
 ## How to use it
 
 ```js
-import { schema } from 'valtio-zod'
+import { schema } from 'valtio-zod';
 
 const userSchema = z.object({
   name: z.string(),
-  age: z.number()
-})
+  age: z.number(),
+});
 
 const userState = schema(userSchema).proxy({
   name: 'John Doe',
-  age: 30
-})
+  age: 30,
+});
 
-userState.name = 'Jane Doe'
+userState.name = 'Jane Doe';
 // userState.name = 'Jane Doe'
 
-userState.name = 55 // Error
+userState.name = 55; // Error
 // userState.name = 'Jane Doe'
 ```
 
@@ -59,17 +59,17 @@ function that returns a proxy that can be used to trap the values being set on t
 and validate them against the ZodSchema before passing them on to the valtio store.
 
 ```js
-import { schema } from 'valtio-zod'
+import { schema } from 'valtio-zod';
 
 const userSchema = z.object({
   name: z.string(),
-  age: z.number()
-})
+  age: z.number(),
+});
 
 const userState = schema(userSchema).proxy({
   name: 'John Doe',
-  age: 30
-})
+  age: 30,
+});
 ```
 
 ### Configuration
@@ -87,51 +87,51 @@ to configure the default behavior of all schemas that don't provide their own co
 #### `parseAsync` example
 
 ```js
-import { schema } from 'valtio-zod'
+import { schema } from 'valtio-zod';
 
 const promiseSchema = z.object({
-  name: z.promise(z.string())
-})
+  name: z.promise(z.string()),
+});
 
 const userState = schema(promiseSchema).proxy(
   {
-    name: Promise.resolve('Jane Doe')
+    name: Promise.resolve('Jane Doe'),
   },
   {
-    parseAsync: true
-  }
-)
+    parseAsync: true,
+  },
+);
 
-userState.name = 'Jane Doe'
+userState.name = 'Jane Doe';
 // userState.name = 'Jane Doe'
 
-userState.name = 55 // Error
+userState.name = 55; // Error
 // userState.name = 'Jane Doe'
 ```
 
 #### `parseSafe` example\
 
 ```js
-import { schema } from 'valtio-zod'
+import { schema } from 'valtio-zod';
 
 const userSchema = z.object({
-  name: z.string()
-})
+  name: z.string(),
+});
 
 const userState = schema(userSchema).proxy(
   {
     name: 'John Doe',
-    age: 30
+    age: 30,
   },
   {
-    parseSafe: true
-  }
-)
+    parseSafe: true,
+  },
+);
 
-userState.name = 'Jane Doe'
+userState.name = 'Jane Doe';
 // userState.name = 'Jane Doe'
 
-userState.name = 55 // Error
+userState.name = 55; // Error
 // this will call the errorHandler function without throwing an error
 // userState.name = 'Jane Doe'
 ```
@@ -139,9 +139,9 @@ userState.name = 55 // Error
 `parseSafe` is also available as a property on the `vzGlobalConfig` object
 
 ```js
-import { vzGlobalConfig } from 'valtio-zod'
+import { vzGlobalConfig } from 'valtio-zod';
 
-vzGlobalConfig.parseSafe = true
+vzGlobalConfig.parseSafe = true;
 ```
 
 #### `errorHandler` example
@@ -149,22 +149,22 @@ vzGlobalConfig.parseSafe = true
 This will allow you to use your own error handling logic (or use `Zod.Error`)
 
 ```js
-import { schema, errorHandler } from 'valtio-zod'
+import { schema, errorHandler } from 'valtio-zod';
 
 const userSchema = z.object({
   name: z.string(),
-  age: z.number()
-})
+  age: z.number(),
+});
 
 const userState = schema(userSchema).proxy(
   {
     name: 'John Doe',
-    age: 30
+    age: 30,
   },
   {
     errorHandler: (error) => {
-      console.error(error)
-    }
-  }
-)
+      console.error(error);
+    },
+  },
+);
 ```

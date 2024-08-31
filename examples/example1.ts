@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import { schema } from '../src/index'
+import { z } from 'zod';
+import { schema } from '../src/index';
 
 const userSchema = z.object({
   username: z.string(),
@@ -9,10 +9,10 @@ const userSchema = z.object({
     lastName: z.string(),
     address: z.object({
       city: z.string(),
-      country: z.string()
-    })
-  })
-})
+      country: z.string(),
+    }),
+  }),
+});
 
 const user = schema(userSchema).proxy({
   username: 'Alice',
@@ -21,13 +21,13 @@ const user = schema(userSchema).proxy({
     firstName: 'Alice',
     lastName: 'Smith',
     address: {
-      city: 'Wonderland'
-    }
-  }
-})
+      city: 'Wonderland',
+    },
+  },
+});
 
 try {
-  user.username = 'Bob'
+  user.username = 'Bob';
 } catch (e) {
-  console.error(e)
+  console.error(e);
 }
