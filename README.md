@@ -18,7 +18,7 @@ with zod as easy as possible.
 Zod and valtio are peer dependencies.
 
 ```bash
-npm install zod valdtio valtio-zod
+npm install zod valtio valtio-zod
 ```
 
 ## Project Status
