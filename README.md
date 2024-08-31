@@ -1,4 +1,4 @@
-# valtio-zod
+# valtio-zod ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/valtiojs/valtio-zod/ci.yml) ![NPM Version](https://img.shields.io/npm/v/valtio-zod) ![NPM License](https://img.shields.io/npm/l/valtio-zod)
 
 Validate your [valtio](https://github.com/pmndrs/valtio) store values with [Zod](https://zod.dev/)
 
