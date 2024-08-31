@@ -109,7 +109,7 @@ userState.name = 55; // Error
 // userState.name = 'Jane Doe'
 ```
 
-#### `parseSafe` example\
+#### `parseSafe` example
 
 ```js
 import { schema } from 'valtio-zod';
