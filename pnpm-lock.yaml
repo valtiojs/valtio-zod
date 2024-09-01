@@ -5,9 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@types/lodash':
-    specifier: ^4.17.7
-    version: 4.17.7
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -31,6 +28,9 @@ devDependencies:
   '@testing-library/user-event':
     specifier: ^14.5.2
     version: 14.5.2
+  '@types/lodash':
+    specifier: ^4.17.7
+    version: 4.17.7
   '@types/node':
     specifier: ^20.13.0
     version: 20.16.1
@@ -92,8 +92,8 @@ devDependencies:
     specifier: ^5.4.5
     version: 5.5.4
   valtio:
-    specifier: ^2.0.0-rc.0
-    version: 2.0.0-rc.2(@types/react@18.3.4)(react@18.3.1)
+    specifier: 2.0.0
+    version: 2.0.0(@types/react@18.3.4)(react@18.3.1)
   valtio-validate:
     specifier: link:.
     version: 'link:'
@@ -835,7 +835,7 @@ packages:
 
   /@types/lodash@4.17.7:
     resolution: {integrity: sha512-8wTvZawATi/lsmNu10/j2hk1KEP0IvjubqPE3cu1Xz7xfXXt5oCq3SNUz4fMIP4XGF9Ky+Ue2tBA3hcS7LSBlA==}
-    dev: false
+    dev: true
 
   /@types/node@20.16.1:
     resolution: {integrity: sha512-zJDo7wEadFtSyNz5QITDfRcrhqDvQI1xQNQ0VoizPjM/dVAODqqIUWbJPkvsxmTI0MYRGRikcdjMPhOssnPejQ==}
@@ -3754,8 +3754,8 @@ packages:
     hasBin: true
     dev: true
 
-  /valtio@2.0.0-rc.2(@types/react@18.3.4)(react@18.3.1):
-    resolution: {integrity: sha512-bRNsvj+oM0i5zxISD9/i1VXd/Poa4YKeeKxiNT6nqrCIDvqcqj4uxLWsuWh65LczH5lKKnJPGEcbauL0XYLatA==}
+  /valtio@2.0.0(@types/react@18.3.4)(react@18.3.1):
+    resolution: {integrity: sha512-SzUU5UUK/vBRfHWXihwkJE55YNj8zhOkzxPOexcz0xIIT6Oux5VLynCmzyME2bYuEWcktW2NTaaLbpUydEsHiw==}
     engines: {node: '>=12.20.0'}
     peerDependencies:
       '@types/react': '>=18.0.0'
