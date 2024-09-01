@@ -114,12 +114,6 @@ export const schema = <T extends ZodType<any>>(
       })
 
       return new Proxy(target, {
-        get(target, prop, receiver) {
-          const value = Reflect.get(target, prop, receiver)
-          return isObject(value)
-            ? createProxy(value, parentPath.concat(prop))
-            : value
-        },
         set(target, prop, value, receiver) {
           const originalObject = schemaMeta.get(zodSchema)!
             .initialState as z.infer<T>
