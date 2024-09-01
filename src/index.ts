@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { z, ZodType } from 'zod'
-import { proxy as vproxy } from 'valtio'
+import { proxy as vproxy, useSnapshot as vsnap } from 'valtio'
 import _ from 'lodash'
 
 type ValtioProxy<T> = {
@@ -38,7 +38,10 @@ const schemaMeta = new WeakMap<ZodType<any>, SchemaMeta>()
 const pathList = new WeakMap<{}, PropType[]>()
 
 type SchemaReturn<T extends ZodType<any>> = {
-  proxy: (initialState: any, config?: SchemaConfig) => ValtioProxy<z.infer<T>>
+  proxy: {
+    (initialState: any, config?: SchemaConfig): ValtioProxy<z.infer<T>>
+  }
+  useSnapshot: (store: ValtioProxy<z.infer<T>>) => any
 }
 
 function updateObjectAtPath(obj: any, path: PropType[], newValue: any) {
@@ -58,9 +61,12 @@ function updateObjectAtPath(obj: any, path: PropType[], newValue: any) {
   if (lastKey !== undefined) object[lastKey] = newValue
 }
 
+const valtioStoreSymbol = Symbol('valtioStore')
+
 export const schema = <T extends ZodType<any>>(
   zodSchema: T
 ): SchemaReturn<T> => {
+  let valtioProxy: any
   const proxy = (
     initialState: z.infer<T>,
     config: SchemaConfig = {}
@@ -84,7 +90,7 @@ export const schema = <T extends ZodType<any>>(
       zodSchema.parse(initialState)
     }
 
-    const valtioProxy = vproxy(initialState)
+    valtioProxy = vproxy(initialState)
 
     const createProxy = (target: any, parentPath: PropType[] = []): any => {
       if (!schemaMeta.has(zodSchema)) {
@@ -124,6 +130,7 @@ export const schema = <T extends ZodType<any>>(
             try {
               const parsedValue = await zodSchema.parseAsync(objectToValidate)
               _.set(valtioProxy, value, path)
+              Reflect.set(target, prop, value, receiver)
               return true
             } catch (error) {
               errorHandler(error)
@@ -139,7 +146,8 @@ export const schema = <T extends ZodType<any>>(
               if (safeParse) {
                 const result = zodSchema.safeParse(objectToValidate)
                 if (result.success) {
-                  _.set(valtioProxy, path, value)
+                  valtioProxy[prop] = value
+                  Reflect.set(target, prop, value, receiver)
                   return true
                 } else {
                   errorHandler(result.error)
@@ -147,7 +155,8 @@ export const schema = <T extends ZodType<any>>(
                 }
               } else {
                 const parsedValue = zodSchema.parse(objectToValidate)
-                _.set(valtioProxy, path, value)
+                Reflect.set(target, prop, value, receiver)
+                valtioProxy[prop] = value
                 return true
               }
             } catch (error) {
@@ -173,7 +182,15 @@ export const schema = <T extends ZodType<any>>(
         }
       })
     }
-    return createProxy(valtioProxy)
+
+    const store = createProxy(valtioProxy)
+    store[valtioStoreSymbol] = valtioProxy
+
+    return store
   }
-  return { proxy }
+
+  const snap = (store: any) => {
+    return vsnap(store[valtioStoreSymbol])
+  }
+  return { proxy, useSnapshot: snap }
 }
