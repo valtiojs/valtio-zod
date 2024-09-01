@@ -1,7 +1,7 @@
 {
   "name": "valtio-zod",
   "description": "Validate store values in valtio with zod",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "type": "module",
   "author": "Michael Sweeney",
   "repository": {
