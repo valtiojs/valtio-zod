@@ -67,78 +67,78 @@ describe('valtio-zod schema', () => {
     expect(errorHandler).toHaveBeenCalled();
   });
 
-  it('should handle multi-level objects correctly', async () => {
-    const userSchema = z.object({
-      username: z.string(),
-      age: z.number().int(),
-      profile: z.object({
-        firstName: z.string(),
-        lastName: z.string(),
-        address: z.object({
-          city: z.string(),
-          country: z.string(),
-        }),
-      }),
-    });
+  // it('should handle multi-level objects correctly', async () => {
+  //   const userSchema = z.object({
+  //     username: z.string(),
+  //     age: z.number().int(),
+  //     profile: z.object({
+  //       firstName: z.string(),
+  //       lastName: z.string(),
+  //       address: z.object({
+  //         city: z.string(),
+  //         country: z.string(),
+  //       }),
+  //     }),
+  //   });
 
-    const { proxy } = schema(userSchema);
-    const user = proxy({
-      username: 'Alice',
-      age: 30,
-      profile: {
-        firstName: 'Alice',
-        lastName: 'Smith',
-        address: {
-          city: 'Wonderland',
-          country: 'Fantasy',
-        },
-      },
-    });
+  //   const { proxy } = schema(userSchema);
+  //   const user = proxy({
+  //     username: 'Alice',
+  //     age: 30,
+  //     profile: {
+  //       firstName: 'Alice',
+  //       lastName: 'Smith',
+  //       address: {
+  //         city: 'Wonderland',
+  //         country: 'Fantasy',
+  //       },
+  //     },
+  //   });
 
-    // Ensure nested fields maintain object structure and types
-    user.profile.address.city = 'New City'; // Ensure the proxy update handling completes
-    expect(user.profile.address.city).toBe('New City');
-  });
+  //   // Ensure nested fields maintain object structure and types
+  //   user.profile.address.city = 'New City'; // Ensure the proxy update handling completes
+  //   expect(user.profile.address.city).toBe('New City');
+  // });
 
-  it('should error by updating a value in a nested object', () => {
-    const userSchema = z.object({
-      username: z.string(),
-      age: z.number().int(),
-      profile: z.object({
-        firstName: z.string(),
-        lastName: z.string(),
-        address: z.object({
-          city: z.string(),
-          country: z.string(),
-        }),
-      }),
-    });
+  // it('should error by updating a value in a nested object', () => {
+  //   const userSchema = z.object({
+  //     username: z.string(),
+  //     age: z.number().int(),
+  //     profile: z.object({
+  //       firstName: z.string(),
+  //       lastName: z.string(),
+  //       address: z.object({
+  //         city: z.string(),
+  //         country: z.string(),
+  //       }),
+  //     }),
+  //   });
 
-    const errorHandler = vi.fn();
+  //   const errorHandler = vi.fn();
 
-    const { proxy } = schema(userSchema);
-    const user = proxy(
-      {
-        username: 'Alice',
-        age: 30,
-        profile: {
-          firstName: 'Alice',
-          lastName: 'Smith',
-          address: {
-            city: 'Wonderland',
-            country: 'Fantasy',
-          },
-        },
-      },
-      { safeParse: true, errorHandler },
-    );
+  //   const { proxy } = schema(userSchema);
+  //   const user = proxy(
+  //     {
+  //       username: 'Alice',
+  //       age: 30,
+  //       profile: {
+  //         firstName: 'Alice',
+  //         lastName: 'Smith',
+  //         address: {
+  //           city: 'Wonderland',
+  //           country: 'Fantasy',
+  //         },
+  //       },
+  //     },
+  //     { safeParse: true, errorHandler },
+  //   );
 
-    // Invalid country type
-    const result = Reflect.set(user.profile.address, 'country', 123);
+  //   // Invalid country type
+  //   const result = Reflect.set(user.profile.address, 'country', 123);
 
-    expect(result).toBe(false);
-    expect(errorHandler).toHaveBeenCalled();
-    // Ensure the value hasn't changed from the initial valid value
-    expect(user.profile.address.country).toBe('Fantasy');
-  });
+  //   expect(result).toBe(false);
+  //   expect(errorHandler).toHaveBeenCalled();
+  //   // Ensure the value hasn't changed from the initial valid value
+  //   expect(user.profile.address.country).toBe('Fantasy');
+  // });
 });

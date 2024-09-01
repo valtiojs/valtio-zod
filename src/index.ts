@@ -106,16 +106,16 @@ export const schema = <T extends ZodType<any>>(
       }
 
       return new Proxy(target, {
-        get(target, prop, receiver) {
-          const value = Reflect.get(target, prop, receiver);
-          if (isObject(value)) {
-            const newPath = parentPath.concat(prop);
-            pathList.set(value, newPath);
-            return createProxy(value, newPath);
-          } else {
-            return value;
-          }
-        },
+        // get(target, prop, receiver) {
+        //   const value = Reflect.get(target, prop, receiver)
+        //   if (isObject(value)) {
+        //     const newPath = parentPath.concat(prop)
+        //     pathList.set(value, newPath)
+        //     return createProxy(value, newPath)
+        //   } else {
+        //     return value
+        //   }
+        // },
         set(target, prop, value, receiver) {
           const originalObject = schemaMeta.get(zodSchema)!
             .initialState as z.infer<T>;
