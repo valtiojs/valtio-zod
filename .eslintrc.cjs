@@ -12,14 +12,14 @@ module.exports = {
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
-    'prettier'
+    'prettier',
   ],
   ignorePatterns: ['dist/', 'examples/'],
   settings: {
     'import/resolver': {
-      typescript: true
+      typescript: true,
     },
-    react: { version: 'detect' }
+    react: { version: 'detect' },
   },
   rules: {
     'import/no-unresolved': ['error', { ignore: ['valtio-zod'] }],
@@ -32,8 +32,8 @@ module.exports = {
         caughtErrorsIgnorePattern: '^_',
         destructuredArrayIgnorePattern: '^_',
         varsIgnorePattern: '^_',
-        ignoreRestSiblings: true
-      }
-    ]
-  }
-}
+        ignoreRestSiblings: true,
+      },
+    ],
+  },
+};
