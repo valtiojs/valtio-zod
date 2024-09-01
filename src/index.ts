@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { z, ZodType } from 'zod'
 import { proxy as vproxy } from 'valtio'
+import _ from 'lodash'
 
 type ValtioProxy<T> = {
   [P in keyof T]: T[P]
@@ -40,7 +41,7 @@ type SchemaReturn<T extends ZodType<any>> = {
   proxy: (initialState: any, config?: SchemaConfig) => ValtioProxy<z.infer<T>>
 }
 
-function updateObjectAtPath(obj: any, newValue: any, path: PropType[]) {
+function updateObjectAtPath(obj: any, path: PropType[], newValue: any) {
   let stack = [...path]
   let object = obj
 
@@ -117,12 +118,12 @@ export const schema = <T extends ZodType<any>>(
           const objectToValidate = JSON.parse(JSON.stringify(originalObject))
           const path = (pathList.get(target) || []).concat(prop)
 
-          updateObjectAtPath(objectToValidate, value, path)
+          updateObjectAtPath(objectToValidate, path, value)
 
           const handleAsyncParse = async () => {
             try {
               const parsedValue = await zodSchema.parseAsync(objectToValidate)
-              updateObjectAtPath(valtioProxy, value, path)
+              _.set(valtioProxy, value, path)
               return true
             } catch (error) {
               errorHandler(error)
@@ -138,7 +139,7 @@ export const schema = <T extends ZodType<any>>(
               if (safeParse) {
                 const result = zodSchema.safeParse(objectToValidate)
                 if (result.success) {
-                  updateObjectAtPath(valtioProxy, value, path)
+                  _.set(valtioProxy, path, value)
                   return true
                 } else {
                   errorHandler(result.error)
@@ -146,7 +147,7 @@ export const schema = <T extends ZodType<any>>(
                 }
               } else {
                 const parsedValue = zodSchema.parse(objectToValidate)
-                updateObjectAtPath(valtioProxy, value, path)
+                _.set(valtioProxy, path, value)
                 return true
               }
             } catch (error) {
