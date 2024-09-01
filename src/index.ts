@@ -36,6 +36,7 @@ type SchemaMeta = SchemaConfig & {
 type PropType = string | number | symbol;
 const schemaMeta = new WeakMap<ZodType<any>, SchemaMeta>();
 const pathList = new WeakMap<{}, PropType[]>();
+const isProxySymbol = Symbol('isProxy');
 
 type SchemaReturn<T extends ZodType<any>> = {
   proxy: {
@@ -91,12 +92,18 @@ export const schema = <T extends ZodType<any>>(
         get(target, prop, receiver) {
           const value = Reflect.get(target, prop, receiver);
           if (isObject(value)) {
-            const newPath = parentPath.concat(prop);
-            pathList.set(value, newPath);
-            return createProxy(value, newPath);
+            if ((value as any)[isProxySymbol]) {
+              return value;
+            } else {
+              const newPath = parentPath.concat(prop);
+              pathList.set(value, newPath);
+              const proxyObj = createProxy(value, newPath);
+              proxyObj[isProxySymbol] = true;
+              return proxyObj;
+            }
           } else {
-            const pathToSet = [...(pathList.get(target) || []), prop];
-            return _.get(valtioProxy, pathToSet, value);
+            const pathToGet = [...(pathList.get(target) || []), prop];
+            return _.get(valtioProxy, pathToGet, value);
           }
         },
         set(target, prop, value, receiver) {
@@ -104,14 +111,14 @@ export const schema = <T extends ZodType<any>>(
             .initialState as z.infer<T>;
 
           const objectToValidate = _.cloneDeep(originalObject);
-          const path = (pathList.get(target) || []).concat(prop);
+          const pathToSet = [...(pathList.get(target) || []), prop];
 
-          _.set(objectToValidate, path, value);
+          _.set(objectToValidate, pathToSet, value);
 
           const handleAsyncParse = async () => {
             try {
               const parsedValue = await zodSchema.parseAsync(objectToValidate);
-              _.set(valtioProxy, value, path);
+              _.set(valtioProxy, pathToSet, value);
               Reflect.set(target, prop, value, receiver);
               return true;
             } catch (error) {
@@ -128,7 +135,7 @@ export const schema = <T extends ZodType<any>>(
               if (safeParse) {
                 const result = zodSchema.safeParse(objectToValidate);
                 if (result.success) {
-                  valtioProxy[prop] = value;
+                  _.set(valtioProxy, pathToSet, value);
                   Reflect.set(target, prop, value, receiver);
                   return true;
                 } else {
@@ -137,8 +144,8 @@ export const schema = <T extends ZodType<any>>(
                 }
               } else {
                 const parsedValue = zodSchema.parse(objectToValidate);
+                _.set(valtioProxy, pathToSet, value);
                 Reflect.set(target, prop, value, receiver);
-                valtioProxy[prop] = value;
                 return true;
               }
             } catch (error) {

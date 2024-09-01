@@ -47,8 +47,8 @@ function App() {
       <label htmlFor="age">Age</label>
       <input
         id="age"
-        type="number"
-        value={user.age}
+        type="text"
+        value={'' + user.age}
         onChange={(e) => (userState.age = Number(e.target.value))}
       />
       <p>Age: {user.age}</p>
