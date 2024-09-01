@@ -6,7 +6,7 @@
   "author": "Michael Sweeney",
   "repository": {
     "type": "git",
-    "url": "https://github.com/valtiojs/valtio-zod.git"
+    "url": "git+https://github.com/valtiojs/valtio-zod.git"
   },
   "source": "./src/index.ts",
   "main": "./dist/index.js",
