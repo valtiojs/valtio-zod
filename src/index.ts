@@ -40,8 +40,9 @@ type SchemaReturn<T extends ZodType<any>> = {
   proxy: (initialState: any, config?: SchemaConfig) => ValtioProxy<z.infer<T>>
 }
 
-function updateObjectAtPath(object: any, newValue: any, path: PropType[]) {
+function updateObjectAtPath(obj: any, newValue: any, path: PropType[]) {
   let stack = [...path]
+  let object = obj
 
   while (stack.length > 1) {
     const key = stack.shift()
