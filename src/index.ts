@@ -1,96 +1,99 @@
 /* eslint-disable */
-import { z, ZodType } from 'zod';
-import { proxy as vproxy, useSnapshot as vsnap } from 'valtio';
-import _ from 'lodash';
+import { z, ZodType } from 'zod'
+import { proxy as vproxy, useSnapshot as vsnap } from 'valtio'
+import _ from 'lodash'
 
 type ValtioProxy<T> = {
-  [P in keyof T]: T[P];
-};
+  [P in keyof T]: T[P]
+}
 
 type SchemaConfig = {
-  parseAsync?: boolean;
-  safeParse?: boolean;
-  errorHandler?: (error: unknown) => void;
-};
+  parseAsync?: boolean
+  safeParse?: boolean
+  errorHandler?: (error: unknown) => void
+}
 
 const defaultConfig = {
   parseAsync: false,
   safeParse: false,
-  errorHandler: (error: unknown) => console.error(error),
-};
+  errorHandler: (error: unknown) => console.error(error)
+}
 
 export const vzGlobalConfig = {
   safeParse: false,
-  errorHandler: (error: unknown) => console.error(error),
-};
+  errorHandler: (error: unknown) => console.error(error)
+}
 
 const isObject = (x: unknown): x is object =>
-  typeof x === 'object' && x !== null;
+  typeof x === 'object' && x !== null
 
-type MergedConfig = Required<SchemaConfig>;
+type MergedConfig = Required<SchemaConfig>
 
 type SchemaMeta = SchemaConfig & {
-  initialState: unknown;
-};
+  initialState: unknown
+}
 
-type PropType = string | number | symbol;
-const schemaMeta = new WeakMap<ZodType<any>, SchemaMeta>();
-const pathList = new WeakMap<{}, PropType[]>();
+type PropType = string | number | symbol
+const schemaMeta = new WeakMap<ZodType<any>, SchemaMeta>()
+const pathList = new WeakMap<{}, PropType[]>()
 
 type SchemaReturn<T extends ZodType<any>> = {
   proxy: {
-    (initialState: any, config?: SchemaConfig): ValtioProxy<z.infer<T>>;
-  };
-  useSnapshot: (store: ValtioProxy<z.infer<T>>) => any;
-};
-
-function updateObjectAtPath(obj: any, path: PropType[], newValue: any) {
-  let stack = [...path];
-  let object = obj;
-
-  while (stack.length > 1) {
-    const key = stack.shift();
-    if (key === undefined) return;
-    if (!object[key] || typeof object[key] !== 'object') {
-      object[key] = {};
-    }
-    object = object[key];
+    (initialState: any, config?: SchemaConfig): ValtioProxy<z.infer<T>>
   }
-
-  const lastKey = stack.shift();
-  if (lastKey !== undefined) object[lastKey] = newValue;
 }
 
-const valtioStoreSymbol = Symbol('valtioStore');
+function updateObjectAtPath(obj: any, path: PropType[], newValue: any) {
+  let stack = [...path]
+  let object = obj
+
+  while (stack.length > 1) {
+    const key = stack.shift()
+    if (key === undefined) return
+    if (!object[key] || typeof object[key] !== 'object') {
+      object[key] = {}
+    }
+    object = object[key]
+  }
+
+  const lastKey = stack.shift()
+  if (lastKey !== undefined) object[lastKey] = newValue
+}
+
+const valtioStoreSymbol = Symbol('valtioStore')
+
+export const useSnapshot = (store: any) => {
+  return vsnap(store[valtioStoreSymbol])
+}
 
 export const schema = <T extends ZodType<any>>(
-  zodSchema: T,
+  zodSchema: T
 ): SchemaReturn<T> => {
-  let valtioProxy: any;
+  let valtioProxy: any
   const proxy = (
     initialState: z.infer<T>,
-    config: SchemaConfig = {},
+    config: SchemaConfig = {}
   ): ValtioProxy<z.infer<T>> => {
     if (!isObject(initialState)) {
-      throw new Error('object required');
+      throw new Error('object required')
     }
 
-    const mergedConfig: MergedConfig = { ...defaultConfig, ...config };
+    const mergedConfig: MergedConfig = { ...defaultConfig, ...config }
 
-    const parseAsync = mergedConfig.parseAsync;
-    const safeParse = mergedConfig.safeParse;
-    const errorHandler = mergedConfig.errorHandler;
+    const parseAsync = mergedConfig.parseAsync
+    const safeParse = mergedConfig.safeParse
+    const errorHandler = mergedConfig.errorHandler
 
     // before proxying, validate the initial state
     if (parseAsync) {
       zodSchema.parseAsync(initialState).catch((e) => {
-        throw e;
-      });
+        throw e
+      })
     } else {
-      zodSchema.parse(initialState);
+      zodSchema.parse(initialState)
     }
 
-    valtioProxy = vproxy(initialState);
+    valtioProxy = vproxy(initialState)
 
     const createProxy = (target: any, parentPath: PropType[] = []): any => {
       if (!schemaMeta.has(zodSchema)) {
@@ -98,99 +101,95 @@ export const schema = <T extends ZodType<any>>(
           safeParse,
           parseAsync,
           errorHandler,
-          initialState,
-        });
+          initialState
+        })
       }
 
       Reflect.ownKeys(target).forEach((key) => {
         if (isObject(target[key])) {
-          const newPath = parentPath.concat(key);
-          pathList.set(target[key], newPath);
-          createProxy(target[key], newPath);
+          const newPath = parentPath.concat(key)
+          pathList.set(target[key], newPath)
+          createProxy(target[key], newPath)
         }
-      });
+      })
 
       return new Proxy(target, {
         get(target, prop, receiver) {
-          const value = Reflect.get(target, prop, receiver);
+          const value = Reflect.get(target, prop, receiver)
           return isObject(value)
             ? createProxy(value, parentPath.concat(prop))
-            : value;
+            : value
         },
         set(target, prop, value, receiver) {
           const originalObject = schemaMeta.get(zodSchema)!
-            .initialState as z.infer<T>;
+            .initialState as z.infer<T>
 
-          const objectToValidate = JSON.parse(JSON.stringify(originalObject));
-          const path = (pathList.get(target) || []).concat(prop);
+          const objectToValidate = JSON.parse(JSON.stringify(originalObject))
+          const path = (pathList.get(target) || []).concat(prop)
 
-          updateObjectAtPath(objectToValidate, path, value);
+          updateObjectAtPath(objectToValidate, path, value)
 
           const handleAsyncParse = async () => {
             try {
-              const parsedValue = await zodSchema.parseAsync(objectToValidate);
-              _.set(valtioProxy, value, path);
-              Reflect.set(target, prop, value, receiver);
-              return true;
+              const parsedValue = await zodSchema.parseAsync(objectToValidate)
+              _.set(valtioProxy, value, path)
+              Reflect.set(target, prop, value, receiver)
+              return true
             } catch (error) {
-              errorHandler(error);
+              errorHandler(error)
               if (!safeParse) {
-                throw error;
+                throw error
               }
-              return false;
+              return false
             }
-          };
+          }
 
           const handleSyncParse = () => {
             try {
               if (safeParse) {
-                const result = zodSchema.safeParse(objectToValidate);
+                const result = zodSchema.safeParse(objectToValidate)
                 if (result.success) {
-                  valtioProxy[prop] = value;
-                  Reflect.set(target, prop, value, receiver);
-                  return true;
+                  valtioProxy[prop] = value
+                  Reflect.set(target, prop, value, receiver)
+                  return true
                 } else {
-                  errorHandler(result.error);
-                  return false;
+                  errorHandler(result.error)
+                  return false
                 }
               } else {
-                const parsedValue = zodSchema.parse(objectToValidate);
-                Reflect.set(target, prop, value, receiver);
-                valtioProxy[prop] = value;
-                return true;
+                const parsedValue = zodSchema.parse(objectToValidate)
+                Reflect.set(target, prop, value, receiver)
+                valtioProxy[prop] = value
+                return true
               }
             } catch (error) {
-              errorHandler(error);
+              errorHandler(error)
               if (!safeParse) {
-                throw error;
+                throw error
               }
-              return false;
+              return false
             }
-          };
+          }
 
           if (parseAsync) {
             handleAsyncParse().catch((error) => {
-              errorHandler(error);
+              errorHandler(error)
               if (!safeParse) {
-                throw error;
+                throw error
               }
-            });
-            return true;
+            })
+            return true
           } else {
-            return handleSyncParse();
+            return handleSyncParse()
           }
-        },
-      });
-    };
+        }
+      })
+    }
 
-    const store = createProxy(valtioProxy);
-    store[valtioStoreSymbol] = valtioProxy;
+    const store = createProxy(valtioProxy)
+    store[valtioStoreSymbol] = valtioProxy
 
-    return store;
-  };
-
-  const snap = (store: any) => {
-    return vsnap(store[valtioStoreSymbol]);
-  };
-  return { proxy, useSnapshot: snap };
-};
+    return store
+  }
+  return { proxy }
+}
