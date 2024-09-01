@@ -16,5 +16,5 @@
     }
   },
   "include": ["./src/**/*", "./tests/**/*", "./examples/**/*", "src/test.ts"],
-  "exclude": ["./dist/**/*"]
+  "exclude": ["./dist/**/*", "./tests/vitest-setup.js"]
 }
