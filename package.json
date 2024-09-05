@@ -31,6 +31,7 @@
   ],
   "packageManager": "pnpm@8.15.0",
   "scripts": {
+    "prepublish": "pnpm run prettier --write && pnpm run '/^compile:.*/'",
     "compile": "rm -rf dist && pnpm run '/^compile:.*/'",
     "compile:esm": "tsc -p tsconfig.esm.json",
     "compile:cjs": "tsc -p tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
