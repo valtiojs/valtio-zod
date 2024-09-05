@@ -48,7 +48,6 @@ const valtioStoreSymbol = Symbol('valtioStore');
 
 export const useSnapshot = (store: any) => {
   const valtioStore = store[valtioStoreSymbol];
-  console.log('valtioStore', valtioStore);
   return vsnap(valtioStore[valtioStoreSymbol]);
 };
 
@@ -70,7 +69,6 @@ export const schema = <T extends ZodType<any>>(
     const errorHandler = mergedConfig.errorHandler;
 
     // before proxying, validate the initial state
-    console.log('in schema');
     if (parseAsync) {
       zodSchema.parseAsync(initialState).catch((e) => {
         throw e;
@@ -117,18 +115,15 @@ export const schema = <T extends ZodType<any>>(
           const pathToSet = [...(pathList.get(target) || []), prop];
 
           _.set(objectToValidate, pathToSet, value);
-          console.log(getVersion(valtioProxy));
 
           const handleAsyncParse = async () => {
             try {
               const parsedValue = await zodSchema.parseAsync(objectToValidate);
               _.set(valtioProxy, pathToSet, value);
-              console.log(getVersion(valtioProxy));
               Reflect.set(target, prop, value, receiver);
               return true;
             } catch (error) {
               errorHandler(error);
-              console.log('safepafse in error', safeParse);
               if (!safeParse) {
                 throw error;
               }
@@ -137,7 +132,6 @@ export const schema = <T extends ZodType<any>>(
           };
 
           const handleSyncParse = () => {
-            console.log('safeParse', safeParse);
             try {
               if (safeParse) {
                 const result = zodSchema.safeParse(objectToValidate);
@@ -162,7 +156,7 @@ export const schema = <T extends ZodType<any>>(
               if (!safeParse) {
                 throw error;
               }
-              return false;
+              return true;
             }
           };
 

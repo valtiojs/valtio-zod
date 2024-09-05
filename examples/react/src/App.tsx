@@ -88,7 +88,9 @@ function App() {
         id="country"
         type="text"
         value={user.profile.address.country}
-        onChange={(e) => (userState.profile.address.country = e.target.value)}
+        onChange={(e) =>
+          (userState.profile.address.country = Number(e.target.value))
+        }
       />
       <p>Last Name: {user.profile.address.country}</p>
     </div>
