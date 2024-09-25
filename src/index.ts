@@ -2,7 +2,6 @@
 import { z, ZodType } from 'zod'
 import { proxy as vproxy, useSnapshot as vsnap, getVersion } from 'valtio'
 import _ from 'lodash'
-import type { O } from 'vitest/dist/reporters-yx5ZTtEV.js'
 
 type ValtioProxy<T> = {
   [P in keyof T]: T[P]
